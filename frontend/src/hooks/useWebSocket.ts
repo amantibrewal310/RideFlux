@@ -56,17 +56,18 @@ export function useWebSocket() {
           break;
         }
         case "ride:offered": {
-          const payload = msg as unknown as RideEventPayload;
-          const fare = payload.estimated_fare != null ? Number(payload.estimated_fare) : undefined;
+          const raw = msg as unknown as Record<string, unknown>;
+          const driverId = (raw.matched_driver_id ?? raw.driver_id) as string | undefined;
+          const fare = raw.estimated_fare != null ? Number(raw.estimated_fare) : undefined;
           useRideStore.getState().updateRide({
-            id: payload.ride_id,
+            id: raw.ride_id as string,
             status: "offered",
-            matched_driver_id: payload.matched_driver_id ?? (payload as unknown as Record<string, unknown>).driver_id as string,
-            estimated_fare: fare,
+            matched_driver_id: driverId,
+            ...(fare != null && !isNaN(fare) ? { estimated_fare: fare } : {}),
           });
           useNotificationStore
             .getState()
-            .add("info", `Ride ${payload.ride_id.slice(0, 8)} => offered`);
+            .add("info", `Ride ${(raw.ride_id as string).slice(0, 8)} => offered`);
           break;
         }
         case "ride:no_drivers": {
@@ -81,23 +82,23 @@ export function useWebSocket() {
           break;
         }
         case "ride:matched": {
-          const payload = msg as unknown as RideEventPayload;
+          const raw = msg as unknown as Record<string, unknown>;
+          const driverId = (raw.matched_driver_id ?? raw.driver_id) as string | undefined;
           useRideStore.getState().updateRide({
-            id: payload.ride_id,
-            status: payload.status,
-            matched_driver_id: payload.matched_driver_id,
-            estimated_fare: payload.estimated_fare,
+            id: raw.ride_id as string,
+            status: "accepted",
+            matched_driver_id: driverId,
           });
           useNotificationStore
             .getState()
-            .add("success", `Ride ${payload.ride_id.slice(0, 8)} => matched`);
+            .add("success", `Ride ${(raw.ride_id as string).slice(0, 8)} => accepted`);
           break;
         }
         case "ride:started": {
           const payload = msg as unknown as RideEventPayload;
           useRideStore.getState().updateRide({
             id: payload.ride_id,
-            status: payload.status ?? "in_progress",
+            status: "in_progress",
             trip_id: payload.trip_id,
           });
           useNotificationStore
@@ -109,8 +110,8 @@ export function useWebSocket() {
           const payload = msg as unknown as RideEventPayload;
           useRideStore.getState().updateRide({
             id: payload.ride_id,
-            status: payload.status ?? "completed",
-            total_fare: payload.total_fare,
+            status: "completed",
+            total_fare: payload.total_fare != null ? Number(payload.total_fare) : undefined,
           });
           useNotificationStore
             .getState()

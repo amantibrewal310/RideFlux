@@ -17,10 +17,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function RideStatusBadge({ status }: Props) {
-  const colorClass = STATUS_COLORS[status] ?? "badge--gray";
+  const s = status ?? "unknown";
+  const colorClass = STATUS_COLORS[s] ?? "badge--gray";
   return (
     <span className={`badge ${colorClass}`}>
-      {status.replace(/_/g, " ")}
+      {s.replace(/_/g, " ")}
     </span>
   );
 }
