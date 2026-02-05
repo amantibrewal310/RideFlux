@@ -57,11 +57,12 @@ export function useWebSocket() {
         }
         case "ride:offered": {
           const payload = msg as unknown as RideEventPayload;
+          const fare = payload.estimated_fare != null ? Number(payload.estimated_fare) : undefined;
           useRideStore.getState().updateRide({
             id: payload.ride_id,
             status: "offered",
-            matched_driver_id: payload.matched_driver_id,
-            estimated_fare: payload.estimated_fare,
+            matched_driver_id: payload.matched_driver_id ?? (payload as unknown as Record<string, unknown>).driver_id as string,
+            estimated_fare: fare,
           });
           useNotificationStore
             .getState()

@@ -185,7 +185,7 @@ export default function RideCard({ ride }: Props) {
           <div className="ride-card-actions">
             {ride.total_fare != null && (
               <span className="ride-card-total">
-                Total: INR {ride.total_fare.toFixed(0)}
+                Total: INR {Number(ride.total_fare).toFixed(0)}
               </span>
             )}
             <button
@@ -243,7 +243,7 @@ export default function RideCard({ ride }: Props) {
           <span className="ride-card-vehicle">{ride.vehicle_type}</span>
           <span className="ride-card-fare">
             {ride.estimated_fare != null
-              ? `INR ${ride.estimated_fare.toFixed(0)}`
+              ? `INR ${Number(ride.estimated_fare).toFixed(0)}`
               : "--"}
           </span>
           {ride.matched_driver_id && (
